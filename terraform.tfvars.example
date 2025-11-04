@@ -1,0 +1,32 @@
+# AWS Configuration
+aws_region = "us-east-1"
+
+# Project Configuration
+project_name = "dev-env"
+
+# EC2 Instance Configuration
+instance_type      = "t3.medium"  # Options: t3.small, t3.medium, t3.large, t3.xlarge, etc.
+root_volume_size   = 30           # Size in GB
+
+# Network Configuration
+vpc_cidr           = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"
+# availability_zone  = "us-east-1a"  # Optional: specify AZ, otherwise uses first available
+
+# Security Configuration
+# IMPORTANT: Replace with your actual IP address or CIDR blocks
+# To find your IP: curl https://checkip.amazonaws.com
+allowed_ssh_cidrs = [
+  "1.2.3.4/32",      # Replace with your IP address
+  # "5.6.7.8/32",    # Add more IPs as needed
+]
+
+# Monitoring
+enable_cloudwatch_logs = true
+
+# Additional Tags (optional)
+tags = {
+  Environment = "development"
+  ManagedBy   = "terraform"
+  Owner       = "DevTeam"
+}
