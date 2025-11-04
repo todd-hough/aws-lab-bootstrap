@@ -13,9 +13,9 @@ dnf update -y
 
 # Install basic utilities
 echo "Installing basic utilities..."
+# Note: curl-minimal is already installed on AL2023, so we don't install curl to avoid conflicts
 dnf install -y \
     git \
-    curl \
     wget \
     unzip \
     tar \
@@ -64,12 +64,10 @@ nvm use --lts
 nvm alias default lts/*
 EOF
 
-# Install Claude Code CLI
-echo "Installing Claude Code CLI..."
+# Install Claude Code CLI (native version)
+echo "Installing Claude Code CLI (native version)..."
 sudo -u ec2-user bash << 'EOF'
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-npm install -g @anthropic/claude-code
+curl -fsSL https://claude.com/install.sh | sh
 EOF
 
 # Configure Claude Code for AWS Bedrock
@@ -150,7 +148,7 @@ Installed Software:
 - Python: $(python3 --version)
 - AWS CLI: $(aws --version)
 - Node.js: Run 'source ~/.nvm/nvm.sh && node --version'
-- Claude Code CLI: Run 'source ~/.nvm/nvm.sh && claude --version'
+- Claude Code CLI: $(~/.local/bin/claude --version 2>/dev/null || echo "Native binary installed")
 
 AWS Bedrock Configuration:
 - Region: ${aws_region}
@@ -180,13 +178,16 @@ WELCOME
 
 chown ec2-user:ec2-user /home/ec2-user/WELCOME.txt
 
-# Add nvm initialization and AWS configuration to bashrc
+# Add nvm initialization, Claude Code binary, and AWS configuration to bashrc
 sudo -u ec2-user bash << 'EOF'
 cat >> ~/.bashrc << 'BASHRC'
 
 # AWS Configuration
 export AWS_REGION="${aws_region}"
 export AWS_DEFAULT_REGION="${aws_region}"
+
+# Add Claude Code to PATH
+export PATH="$HOME/.local/bin:$PATH"
 
 # Load nvm
 export NVM_DIR="$HOME/.nvm"
