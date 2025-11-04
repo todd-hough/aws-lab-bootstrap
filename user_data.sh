@@ -43,6 +43,16 @@ usermod -aG docker ec2-user
 echo "Verifying Python3 installation..."
 dnf install -y python3 python3-pip
 
+# Install AWS CLI v2
+echo "Installing AWS CLI v2..."
+cd /tmp
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip -q awscliv2.zip
+./aws/install --update
+rm -rf aws awscliv2.zip
+cd -
+aws --version
+
 # Install Node.js via nvm for ec2-user
 echo "Installing Node.js via nvm..."
 sudo -u ec2-user bash << 'EOF'
@@ -61,6 +71,27 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 npm install -g @anthropic/claude-code
 EOF
+
+# Configure Claude Code for AWS Bedrock
+echo "Configuring Claude Code for AWS Bedrock..."
+sudo -u ec2-user bash << 'BEDROCK_CONFIG'
+# Create Claude Code config directory
+mkdir -p ~/.config/claude-code
+
+# Configure Claude Code to use AWS Bedrock
+# Note: Claude Code will automatically use the EC2 instance IAM role for authentication
+cat > ~/.config/claude-code/config.json << 'CONFIG'
+{
+  "provider": "bedrock",
+  "bedrock": {
+    "region": "${aws_region}",
+    "defaultModel": "anthropic.claude-sonnet-4-5-20250929-v1:0"
+  }
+}
+CONFIG
+
+echo "Claude Code configured to use AWS Bedrock in region ${aws_region}"
+BEDROCK_CONFIG
 
 %{ if enable_cloudwatch }
 # Install and configure CloudWatch agent
@@ -117,14 +148,28 @@ Installed Software:
 - Docker: $(docker --version)
 - Docker Compose: $(docker-compose --version)
 - Python: $(python3 --version)
+- AWS CLI: $(aws --version)
 - Node.js: Run 'source ~/.nvm/nvm.sh && node --version'
 - Claude Code CLI: Run 'source ~/.nvm/nvm.sh && claude --version'
+
+AWS Bedrock Configuration:
+- Region: ${aws_region}
+- Claude Code is configured to use AWS Bedrock
+- Available models:
+  * Claude Opus 4.1 (anthropic.claude-opus-4-1-20250805-v1:0)
+  * Claude Sonnet 4.5 (anthropic.claude-sonnet-4-5-20250929-v1:0) [default]
+  * Claude Haiku 4.5 (anthropic.claude-haiku-4-5-20251001-v1:0)
+- Authentication: EC2 IAM role (automatic)
 
 Getting Started:
 1. Your user is 'ec2-user'
 2. Docker is ready to use (no sudo required)
-3. To use Node.js and Claude Code, run: source ~/.nvm/nvm.sh
-4. Consider adding 'source ~/.nvm/nvm.sh' to ~/.bashrc for automatic loading
+3. Claude Code is ready to use (configured for AWS Bedrock)
+4. AWS credentials are automatically configured via IAM role
+
+Quick Test:
+- Test AWS CLI: aws bedrock list-foundation-models --region ${aws_region}
+- Test Claude Code: claude --help
 
 Instance Details:
 - Project: ${project_name}
@@ -135,9 +180,13 @@ WELCOME
 
 chown ec2-user:ec2-user /home/ec2-user/WELCOME.txt
 
-# Add nvm initialization to bashrc
+# Add nvm initialization and AWS configuration to bashrc
 sudo -u ec2-user bash << 'EOF'
 cat >> ~/.bashrc << 'BASHRC'
+
+# AWS Configuration
+export AWS_REGION="${aws_region}"
+export AWS_DEFAULT_REGION="${aws_region}"
 
 # Load nvm
 export NVM_DIR="$HOME/.nvm"

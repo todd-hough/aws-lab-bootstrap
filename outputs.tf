@@ -44,8 +44,41 @@ output "cloudwatch_log_group" {
   value       = var.enable_cloudwatch_logs ? aws_cloudwatch_log_group.dev_instance_logs[0].name : "CloudWatch logging disabled"
 }
 
+output "bedrock_region" {
+  description = "AWS region configured for Bedrock"
+  value       = var.aws_region
+}
+
+output "bedrock_enabled_models" {
+  description = "Anthropic Claude models enabled in AWS Bedrock"
+  value = {
+    opus = {
+      name     = local.bedrock_models.opus.name
+      model_id = local.bedrock_models.opus.id
+      use_case = local.bedrock_models.opus.use_case
+    }
+    sonnet = {
+      name      = local.bedrock_models.sonnet.name
+      model_id  = local.bedrock_models.sonnet.id
+      global_id = local.bedrock_models.sonnet.global_id
+      use_case  = local.bedrock_models.sonnet.use_case
+    }
+    haiku = {
+      name      = local.bedrock_models.haiku.name
+      model_id  = local.bedrock_models.haiku.id
+      global_id = local.bedrock_models.haiku.global_id
+      use_case  = local.bedrock_models.haiku.use_case
+    }
+  }
+}
+
+output "bedrock_test_command" {
+  description = "Command to test Bedrock access from the EC2 instance"
+  value       = "aws bedrock list-foundation-models --by-provider anthropic --region ${var.aws_region} --query 'modelSummaries[*].[modelId,modelName]' --output table"
+}
+
 output "setup_instructions" {
-  description = "Instructions for setting up SSH access"
+  description = "Instructions for setting up SSH access and Bedrock"
   value       = <<-EOT
     To connect to your instance:
     1. Save the SSH private key:
@@ -63,5 +96,16 @@ output "setup_instructions" {
            User ec2-user
            IdentityFile /path/to/dev-key.pem
        - Connect using Command Palette: "Remote-SSH: Connect to Host"
+
+    4. Enable AWS Bedrock Model Access (FIRST TIME ONLY):
+       - Visit: https://console.aws.amazon.com/bedrock/home?region=${var.aws_region}#/modelaccess
+       - Click "Manage model access"
+       - Enable: Claude Opus 4.1, Claude Sonnet 4.5, Claude Haiku 4.5
+       - Click "Save changes" (approval is typically instant)
+
+    5. Test Bedrock on the EC2 instance:
+       - SSH to instance
+       - Run: aws bedrock list-foundation-models --by-provider anthropic --region ${var.aws_region}
+       - Test Claude Code: claude --help
   EOT
 }

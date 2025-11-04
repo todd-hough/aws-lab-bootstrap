@@ -10,6 +10,7 @@ This project creates a complete AWS development environment including:
 - **Compute**: EC2 instance with configurable size
 - **Security**: Security groups with SSH access restricted to specified IP addresses
 - **IAM**: Instance profile with AdministratorAccess for AWS operations
+- **AI Integration**: AWS Bedrock with Claude models (Opus 4.1, Sonnet 4.5, Haiku 4.5)
 - **Monitoring**: CloudWatch Logs integration for system and application logs
 - **Storage**: EBS root volume with encryption
 
@@ -21,7 +22,8 @@ The EC2 instance comes pre-configured with:
 - **Docker & Docker Compose** - Container runtime and orchestration
 - **Node.js** (via nvm) - JavaScript runtime (LTS version)
 - **Python 3** - Python runtime and pip
-- **Claude Code CLI** - Anthropic's Claude development assistant
+- **AWS CLI v2** - Latest AWS command line interface
+- **Claude Code CLI** - Anthropic's Claude development assistant (pre-configured for AWS Bedrock)
 - **CloudWatch Agent** - AWS monitoring and logging
 - **Essential utilities** - curl, wget, vim, tmux, htop, jq, etc.
 
@@ -113,6 +115,95 @@ Host dev-env
 3. Enter: `ec2-user@<PUBLIC_IP>`
 4. Select the identity file when prompted
 
+## AWS Bedrock Integration
+
+This project includes full integration with AWS Bedrock for using Anthropic's Claude models directly from the EC2 instance.
+
+### Enabled Models
+
+The following Claude models are configured and ready to use:
+
+| Model | Version | Model ID | Use Case |
+|-------|---------|----------|----------|
+| **Claude Opus 4.1** | 4.1 | `anthropic.claude-opus-4-1-20250805-v1:0` | Most intelligent model for complex reasoning and agentic tasks |
+| **Claude Sonnet 4.5** | 4.5 | `anthropic.claude-sonnet-4-5-20250929-v1:0` | Advanced model for agents and coding (default) |
+| **Claude Haiku 4.5** | 4.5 | `anthropic.claude-haiku-4-5-20251001-v1:0` | Efficient model with strong performance |
+
+**Note**: Claude Sonnet 4.5 and Haiku 4.5 support cross-region inference using the `global.anthropic` prefix for better availability.
+
+### First-Time Setup
+
+**IMPORTANT**: Before using Bedrock, you must enable model access (one-time setup):
+
+1. Visit the [AWS Bedrock Model Access page](https://console.aws.amazon.com/bedrock/home#/modelaccess) in your region
+2. Click "Manage model access"
+3. Enable the following models:
+   - Claude Opus 4.1
+   - Claude Sonnet 4.5
+   - Claude Haiku 4.5
+4. Click "Save changes"
+
+Approval is typically instant for most AWS accounts. This only needs to be done once per AWS account per region.
+
+### Claude Code Configuration
+
+Claude Code CLI is pre-configured to use AWS Bedrock with the following settings:
+
+- **Provider**: AWS Bedrock
+- **Region**: Your configured AWS region (from `aws_region` variable)
+- **Default Model**: Claude Sonnet 4.5
+- **Authentication**: EC2 IAM role (automatic, no keys needed)
+
+Configuration file location: `~/.config/claude-code/config.json`
+
+### Testing Bedrock Access
+
+After SSH'ing to your EC2 instance, verify Bedrock access:
+
+```bash
+# List available Anthropic models
+aws bedrock list-foundation-models --by-provider anthropic --region us-east-1
+
+# Test Claude Code
+claude --help
+
+# Check AWS credentials (should show IAM role)
+aws sts get-caller-identity
+```
+
+### Using Claude Code with Bedrock
+
+Once connected to the EC2 instance via VS Code Remote SSH:
+
+```bash
+# Start Claude Code
+claude
+
+# Claude Code will automatically use AWS Bedrock
+# No API key configuration needed!
+```
+
+### Model Invocation Logging
+
+If CloudWatch logging is enabled, all Bedrock model invocations are logged to:
+- **Log Group**: `/aws/bedrock/<project-name>-model-invocations`
+- **Retention**: 7 days
+
+View logs:
+```bash
+aws logs tail /aws/bedrock/dev-env-model-invocations --follow
+```
+
+### Regional Availability
+
+Claude models are available in multiple AWS regions. Common regions:
+- `us-east-1` (N. Virginia) - All models
+- `us-west-2` (Oregon) - All models
+- `eu-west-1` (Ireland) - Most models
+- `ap-southeast-1` (Singapore) - Most models
+
+For cross-region inference with Sonnet 4.5 and Haiku 4.5, use the global endpoint format.
+
 ## Configuration
 
 ### Variables
@@ -142,9 +233,12 @@ After deployment, Terraform provides:
 - `instance_public_ip` - Elastic IP address
 - `instance_id` - EC2 instance ID
 - `ssh_connection_command` - Ready-to-use SSH command
-- `setup_instructions` - Complete setup guide
+- `setup_instructions` - Complete setup guide (includes Bedrock setup steps)
 - `ssh_private_key` - Private key (sensitive)
 - `cloudwatch_log_group` - Log group name for monitoring
+- `bedrock_region` - AWS region configured for Bedrock
+- `bedrock_enabled_models` - Information about enabled Claude models
+- `bedrock_test_command` - Command to test Bedrock access
 
 View outputs:
 ```bash
