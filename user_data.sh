@@ -192,22 +192,24 @@ export NVM_DIR="$HOME/.nvm"
 
 # Claude Code - Model Configuration (auto-discovered from AWS Bedrock on each login)
 # Query AWS Bedrock for latest models
-export ANTHROPIC_MODEL=$(aws bedrock list-foundation-models \
+export ANTHROPIC_DEFAULT_SONNET_MODEL=$(aws bedrock list-foundation-models \
   --by-provider anthropic \
   --region ${aws_region} \
-  --query 'modelSummaries[?contains(modelId, `us.anthropic.claude-sonnet-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --query 'modelSummaries[?contains(modelId, `anthropic.claude-sonnet-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
   --output text 2>/dev/null)
+
+export ANTHROPIC_MODEL="$ANTHROPIC_DEFAULT_SONNET_MODEL"
 
 export ANTHROPIC_DEFAULT_HAIKU_MODEL=$(aws bedrock list-foundation-models \
   --by-provider anthropic \
   --region ${aws_region} \
-  --query 'modelSummaries[?contains(modelId, `us.anthropic.claude-haiku-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --query 'modelSummaries[?contains(modelId, `anthropic.claude-haiku-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
   --output text 2>/dev/null)
 
 export ANTHROPIC_DEFAULT_OPUS_MODEL=$(aws bedrock list-foundation-models \
   --by-provider anthropic \
   --region ${aws_region} \
-  --query 'modelSummaries[?contains(modelId, `us.anthropic.claude-opus-4`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --query 'modelSummaries[?contains(modelId, `anthropic.claude-opus-4`)] | sort_by(@, &modelId) | [-1].modelId' \
   --output text 2>/dev/null)
 
 # Claude Code - Token Limits (prevent Bedrock throttling)
