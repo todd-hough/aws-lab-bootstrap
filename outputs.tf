@@ -97,13 +97,7 @@ output "setup_instructions" {
            IdentityFile /path/to/dev-key.pem
        - Connect using Command Palette: "Remote-SSH: Connect to Host"
 
-    4. Enable AWS Bedrock Model Access (FIRST TIME ONLY):
-       - Visit: https://console.aws.amazon.com/bedrock/home?region=${var.aws_region}#/modelaccess
-       - Click "Manage model access"
-       - Enable: Claude Opus 4.1, Claude Sonnet 4.5, Claude Haiku 4.5
-       - Click "Save changes" (approval is typically instant)
-
-    5. Test Bedrock on the EC2 instance:
+    4. Test Bedrock on the EC2 instance:
        - SSH to instance
        - Run: aws bedrock list-foundation-models --by-provider anthropic --region ${var.aws_region}
        - Test Claude Code: claude --help

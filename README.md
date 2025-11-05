@@ -131,30 +131,19 @@ The following Claude models are configured and ready to use:
 
 **Note**: Claude Sonnet 4.5 and Haiku 4.5 support cross-region inference using the `global.anthropic` prefix for better availability.
 
-### First-Time Setup
-
-**IMPORTANT**: Before using Bedrock, you must enable model access (one-time setup):
-
-1. Visit the [AWS Bedrock Model Access page](https://console.aws.amazon.com/bedrock/home#/modelaccess) in your region
-2. Click "Manage model access"
-3. Enable the following models:
-   - Claude Opus 4.1
-   - Claude Sonnet 4.5
-   - Claude Haiku 4.5
-4. Click "Save changes"
-
-Approval is typically instant for most AWS accounts. This only needs to be done once per AWS account per region.
-
 ### Claude Code Configuration
 
 Claude Code CLI is pre-configured to use AWS Bedrock with the following settings:
 
 - **Provider**: AWS Bedrock
 - **Region**: Your configured AWS region (from `aws_region` variable)
-- **Default Model**: Claude Sonnet 4.5
+- **Models**: Auto-discovered on each login from AWS Bedrock inference profiles
+  - Latest Claude Sonnet 4.5.x (default)
+  - Latest Claude Haiku 4.5.x (fast model)
+  - Latest Claude Opus 4.x
 - **Authentication**: EC2 IAM role (automatic, no keys needed)
 
-Configuration file location: `~/.config/claude-code/config.json`
+Configuration is managed via environment variables in `~/.bashrc` that query AWS Bedrock on each login to discover the latest available model versions.
 
 ### Testing Bedrock Access
 
