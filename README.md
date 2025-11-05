@@ -222,12 +222,9 @@ After deployment, Terraform provides:
 - `instance_public_ip` - Elastic IP address
 - `instance_id` - EC2 instance ID
 - `ssh_connection_command` - Ready-to-use SSH command
-- `setup_instructions` - Complete setup guide (includes Bedrock setup steps)
+- `setup_instructions` - Complete setup guide for SSH and VS Code
 - `ssh_private_key` - Private key (sensitive)
 - `cloudwatch_log_group` - Log group name for monitoring
-- `bedrock_region` - AWS region configured for Bedrock
-- `bedrock_enabled_models` - Information about enabled Claude models
-- `bedrock_test_command` - Command to test Bedrock access
 
 View outputs:
 ```bash
