@@ -67,7 +67,7 @@ EOF
 # Install Claude Code CLI (native version)
 echo "Installing Claude Code CLI (native version)..."
 sudo -u ec2-user bash << 'EOF'
-curl -fsSL https://claude.com/install.sh | sh
+curl -fsSL https://claude.ai/install.sh | bash
 EOF
 
 # Install ccusage (Claude Code usage tracker)
