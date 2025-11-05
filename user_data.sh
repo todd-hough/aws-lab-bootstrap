@@ -191,25 +191,22 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 # Claude Code - Model Configuration (auto-discovered from AWS Bedrock on each login)
-# Query AWS Bedrock for latest models
-export ANTHROPIC_DEFAULT_SONNET_MODEL=$(aws bedrock list-foundation-models \
-  --by-provider anthropic \
+# Query AWS Bedrock for latest inference profiles
+export ANTHROPIC_DEFAULT_SONNET_MODEL=$(aws bedrock list-inference-profiles \
   --region ${aws_region} \
-  --query 'modelSummaries[?contains(modelId, `anthropic.claude-sonnet-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --query 'inferenceProfileSummaries[?contains(inferenceProfileId, `claude-sonnet-4-5`)] | sort_by(@, &inferenceProfileId) | [-1].inferenceProfileId' \
   --output text 2>/dev/null)
 
 export ANTHROPIC_MODEL="$ANTHROPIC_DEFAULT_SONNET_MODEL"
 
-export ANTHROPIC_DEFAULT_HAIKU_MODEL=$(aws bedrock list-foundation-models \
-  --by-provider anthropic \
+export ANTHROPIC_DEFAULT_HAIKU_MODEL=$(aws bedrock list-inference-profiles \
   --region ${aws_region} \
-  --query 'modelSummaries[?contains(modelId, `anthropic.claude-haiku-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --query 'inferenceProfileSummaries[?contains(inferenceProfileId, `claude-haiku-4-5`)] | sort_by(@, &inferenceProfileId) | [-1].inferenceProfileId' \
   --output text 2>/dev/null)
 
-export ANTHROPIC_DEFAULT_OPUS_MODEL=$(aws bedrock list-foundation-models \
-  --by-provider anthropic \
+export ANTHROPIC_DEFAULT_OPUS_MODEL=$(aws bedrock list-inference-profiles \
   --region ${aws_region} \
-  --query 'modelSummaries[?contains(modelId, `anthropic.claude-opus-4`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --query 'inferenceProfileSummaries[?contains(inferenceProfileId, `claude-opus-4`)] | sort_by(@, &inferenceProfileId) | [-1].inferenceProfileId' \
   --output text 2>/dev/null)
 
 # Claude Code - Token Limits (prevent Bedrock throttling)
