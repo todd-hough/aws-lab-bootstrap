@@ -78,26 +78,6 @@ export NVM_DIR="$HOME/.nvm"
 npm install -g ccusage
 EOF
 
-# Configure Claude Code for AWS Bedrock
-echo "Configuring Claude Code for AWS Bedrock..."
-sudo -u ec2-user bash << 'BEDROCK_CONFIG'
-# Create Claude Code config directory
-mkdir -p ~/.claude
-
-# Configure Claude Code to use AWS Bedrock via settings
-# Note: Native Claude Code uses environment variables for Bedrock
-cat > ~/.claude/settings.json << 'CONFIG'
-{
-  "env": {
-    "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-    "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-  }
-}
-CONFIG
-
-echo "Claude Code configured to use AWS Bedrock in region ${aws_region}"
-BEDROCK_CONFIG
-
 %{ if enable_cloudwatch }
 # Install and configure CloudWatch agent
 echo "Installing CloudWatch agent..."
@@ -162,22 +142,25 @@ AWS Bedrock Configuration:
 - Region: ${aws_region}
 - Claude Code is configured to use AWS Bedrock
 - Environment: CLAUDE_CODE_USE_BEDROCK=1
-- Available models:
-  * Claude Opus 4.1 (us.anthropic.claude-opus-4-1-20250805-v1:0)
-  * Claude Sonnet 4.5 (us.anthropic.claude-sonnet-4-5-20250929-v1:0) [default]
-  * Claude Haiku 4.5 (us.anthropic.claude-haiku-4-5-20251001-v1:0) [fast model]
+- Models: Auto-discovered on each login
+  * Latest Claude Opus 4.x [ANTHROPIC_DEFAULT_OPUS_MODEL]
+  * Latest Claude Sonnet 4.5.x [ANTHROPIC_MODEL - default]
+  * Latest Claude Haiku 4.5.x [ANTHROPIC_DEFAULT_HAIKU_MODEL - fast model]
 - Authentication: EC2 IAM role (automatic)
+- Note: Models are queried from Bedrock on each login via ~/.bashrc
 
 Getting Started:
 1. Your user is 'ec2-user'
 2. Docker is ready to use (no sudo required)
 3. Claude Code is ready to use (configured for AWS Bedrock)
 4. AWS credentials are automatically configured via IAM role
+5. Note: First login may take a few seconds while querying latest models
 
 Quick Test:
 - Test AWS CLI: aws bedrock list-foundation-models --region ${aws_region}
 - Test Claude Code: claude --help
 - Check Claude Code usage: ccusage
+- Check model configuration: echo $ANTHROPIC_MODEL
 
 Instance Details:
 - Project: ${project_name}
@@ -206,6 +189,30 @@ export PATH="$HOME/.local/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Claude Code - Model Configuration (auto-discovered from AWS Bedrock on each login)
+# Query AWS Bedrock for latest models
+export ANTHROPIC_MODEL=$(aws bedrock list-foundation-models \
+  --by-provider anthropic \
+  --region ${aws_region} \
+  --query 'modelSummaries[?contains(modelId, `us.anthropic.claude-sonnet-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --output text 2>/dev/null)
+
+export ANTHROPIC_DEFAULT_HAIKU_MODEL=$(aws bedrock list-foundation-models \
+  --by-provider anthropic \
+  --region ${aws_region} \
+  --query 'modelSummaries[?contains(modelId, `us.anthropic.claude-haiku-4-5`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --output text 2>/dev/null)
+
+export ANTHROPIC_DEFAULT_OPUS_MODEL=$(aws bedrock list-foundation-models \
+  --by-provider anthropic \
+  --region ${aws_region} \
+  --query 'modelSummaries[?contains(modelId, `us.anthropic.claude-opus-4`)] | sort_by(@, &modelId) | [-1].modelId' \
+  --output text 2>/dev/null)
+
+# Claude Code - Token Limits (prevent Bedrock throttling)
+export CLAUDE_CODE_MAX_OUTPUT_TOKENS=4096
+export MAX_THINKING_TOKENS=1024
 BASHRC
 EOF
 
