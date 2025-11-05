@@ -70,20 +70,27 @@ sudo -u ec2-user bash << 'EOF'
 curl -fsSL https://claude.com/install.sh | sh
 EOF
 
+# Install ccusage (Claude Code usage tracker)
+echo "Installing ccusage..."
+sudo -u ec2-user bash << 'EOF'
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+npm install -g ccusage
+EOF
+
 # Configure Claude Code for AWS Bedrock
 echo "Configuring Claude Code for AWS Bedrock..."
 sudo -u ec2-user bash << 'BEDROCK_CONFIG'
 # Create Claude Code config directory
-mkdir -p ~/.config/claude-code
+mkdir -p ~/.claude
 
-# Configure Claude Code to use AWS Bedrock
-# Note: Claude Code will automatically use the EC2 instance IAM role for authentication
-cat > ~/.config/claude-code/config.json << 'CONFIG'
+# Configure Claude Code to use AWS Bedrock via settings
+# Note: Native Claude Code uses environment variables for Bedrock
+cat > ~/.claude/settings.json << 'CONFIG'
 {
-  "provider": "bedrock",
-  "bedrock": {
-    "region": "${aws_region}",
-    "defaultModel": "anthropic.claude-sonnet-4-5-20250929-v1:0"
+  "env": {
+    "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
   }
 }
 CONFIG
@@ -149,14 +156,16 @@ Installed Software:
 - AWS CLI: $(aws --version)
 - Node.js: Run 'source ~/.nvm/nvm.sh && node --version'
 - Claude Code CLI: $(~/.local/bin/claude --version 2>/dev/null || echo "Native binary installed")
+- ccusage: Run 'source ~/.nvm/nvm.sh && ccusage --version'
 
 AWS Bedrock Configuration:
 - Region: ${aws_region}
 - Claude Code is configured to use AWS Bedrock
+- Environment: CLAUDE_CODE_USE_BEDROCK=1
 - Available models:
-  * Claude Opus 4.1 (anthropic.claude-opus-4-1-20250805-v1:0)
-  * Claude Sonnet 4.5 (anthropic.claude-sonnet-4-5-20250929-v1:0) [default]
-  * Claude Haiku 4.5 (anthropic.claude-haiku-4-5-20251001-v1:0)
+  * Claude Opus 4.1 (us.anthropic.claude-opus-4-1-20250805-v1:0)
+  * Claude Sonnet 4.5 (us.anthropic.claude-sonnet-4-5-20250929-v1:0) [default]
+  * Claude Haiku 4.5 (us.anthropic.claude-haiku-4-5-20251001-v1:0) [fast model]
 - Authentication: EC2 IAM role (automatic)
 
 Getting Started:
@@ -168,6 +177,7 @@ Getting Started:
 Quick Test:
 - Test AWS CLI: aws bedrock list-foundation-models --region ${aws_region}
 - Test Claude Code: claude --help
+- Check Claude Code usage: ccusage
 
 Instance Details:
 - Project: ${project_name}
@@ -185,6 +195,9 @@ cat >> ~/.bashrc << 'BASHRC'
 # AWS Configuration
 export AWS_REGION="${aws_region}"
 export AWS_DEFAULT_REGION="${aws_region}"
+
+# Claude Code - Enable AWS Bedrock
+export CLAUDE_CODE_USE_BEDROCK=1
 
 # Add Claude Code to PATH
 export PATH="$HOME/.local/bin:$PATH"
