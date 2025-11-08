@@ -23,9 +23,8 @@ variable "root_volume_size" {
 }
 
 variable "allowed_ssh_cidrs" {
-  description = "List of CIDR blocks allowed to SSH to the instance"
+  description = "List of CIDR blocks allowed to SSH to the instance (required - must explicitly specify allowed IPs)"
   type        = list(string)
-  default     = []
 }
 
 variable "vpc_cidr" {

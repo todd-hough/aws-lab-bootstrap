@@ -94,7 +94,7 @@ resource "aws_security_group" "dev_instance" {
 
   # SSH access from allowed IPs
   dynamic "ingress" {
-    for_each = length(var.allowed_ssh_cidrs) > 0 ? var.allowed_ssh_cidrs : ["0.0.0.0/0"]
+    for_each = var.allowed_ssh_cidrs
     content {
       description = "SSH from allowed IPs"
       from_port   = 22
