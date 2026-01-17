@@ -70,6 +70,18 @@ sudo -u ec2-user bash << 'EOF'
 curl -fsSL https://claude.ai/install.sh | bash
 EOF
 
+# Install Kiro CLI
+echo "Installing Kiro CLI..."
+sudo -u ec2-user bash << 'EOF'
+curl -fsSL https://cli.kiro.dev/install | bash
+EOF
+
+# Install OpenCode CLI
+echo "Installing OpenCode CLI..."
+sudo -u ec2-user bash << 'EOF'
+curl -fsSL https://opencode.ai/install | bash
+EOF
+
 # Install ccusage (Claude Code usage tracker)
 echo "Installing ccusage..."
 sudo -u ec2-user bash << 'EOF'
@@ -136,29 +148,36 @@ Installed Software:
 - AWS CLI: $(aws --version)
 - Node.js: Run 'source ~/.nvm/nvm.sh && node --version'
 - Claude Code CLI: $(~/.local/bin/claude --version 2>/dev/null || echo "Native binary installed")
+- Kiro CLI: $(~/.local/bin/kiro-cli --version 2>/dev/null || echo "Installed")
+- OpenCode: $(~/.local/bin/opencode --version 2>/dev/null || echo "Installed")
 - ccusage: Run 'source ~/.nvm/nvm.sh && ccusage --version'
 
 AWS Bedrock Configuration:
 - Region: ${aws_region}
-- Claude Code is configured to use AWS Bedrock
-- Environment: CLAUDE_CODE_USE_BEDROCK=1
+- Authentication: EC2 IAM role (automatic)
 - Models: Auto-discovered on each login
   * Latest Claude Opus 4.x [ANTHROPIC_DEFAULT_OPUS_MODEL]
   * Latest Claude Sonnet 4.5.x [ANTHROPIC_MODEL - default]
   * Latest Claude Haiku 4.5.x [ANTHROPIC_DEFAULT_HAIKU_MODEL - fast model]
-- Authentication: EC2 IAM role (automatic)
 - Note: Models are queried from Bedrock on each login via ~/.bashrc
+
+AI Coding Tools (all configured for AWS Bedrock):
+- Claude Code: Uses CLAUDE_CODE_USE_BEDROCK=1
+- Kiro CLI: Uses AWS credentials automatically
+- OpenCode: Auto-detects Bedrock from AWS environment
 
 Getting Started:
 1. Your user is 'ec2-user'
 2. Docker is ready to use (no sudo required)
-3. Claude Code is ready to use (configured for AWS Bedrock)
+3. AI coding tools ready: Claude Code, Kiro CLI, OpenCode (all use AWS Bedrock)
 4. AWS credentials are automatically configured via IAM role
 5. Note: First login may take a few seconds while querying latest models
 
 Quick Test:
 - Test AWS CLI: aws bedrock list-foundation-models --region ${aws_region}
 - Test Claude Code: claude --help
+- Test Kiro CLI: kiro-cli doctor
+- Test OpenCode: opencode --version
 - Check Claude Code usage: ccusage
 - Check model configuration: echo $ANTHROPIC_MODEL
 

@@ -10,7 +10,7 @@ This project creates a complete AWS development environment including:
 - **Compute**: EC2 instance with configurable size
 - **Security**: Security groups with SSH access restricted to specified IP addresses
 - **IAM**: Instance profile with AdministratorAccess for AWS operations
-- **AI Integration**: AWS Bedrock with Claude models (Opus 4.1, Sonnet 4.5, Haiku 4.5)
+- **AI Coding Tools**: Claude Code (recommended), Kiro CLI, OpenCode - all configured for AWS Bedrock
 - **Monitoring**: CloudWatch Logs integration for system and application logs
 - **Storage**: EBS root volume with encryption
 
@@ -23,7 +23,9 @@ The EC2 instance comes pre-configured with:
 - **Node.js** (via nvm) - JavaScript runtime (LTS version)
 - **Python 3** - Python runtime and pip
 - **AWS CLI v2** - Latest AWS command line interface
-- **Claude Code CLI** - Anthropic's Claude development assistant (pre-configured for AWS Bedrock)
+- **Claude Code CLI** - Anthropic's Claude development assistant (pre-configured for AWS Bedrock) *(Recommended)*
+- **Kiro CLI** - AWS's agentic coding tool with spec-driven development
+- **OpenCode** - Open-source AI coding agent supporting multiple providers
 - **CloudWatch Agent** - AWS monitoring and logging
 - **Essential utilities** - curl, wget, vim, tmux, htop, jq, etc.
 
@@ -145,6 +147,20 @@ Claude Code CLI is pre-configured to use AWS Bedrock with the following settings
 
 Configuration is managed via environment variables in `~/.bashrc` that query AWS Bedrock on each login to discover the latest available model versions.
 
+### AI Coding Tools
+
+This environment includes three agentic AI coding tools, all pre-configured for AWS Bedrock:
+
+| Tool | Recommended For | Key Feature |
+|------|-----------------|-------------|
+| **Claude Code** *(Recommended)* | Starting point, general use | Parallel subagents, highest benchmarks |
+| **Kiro CLI** | Spec-driven development | Formal requirements workflow, agent hooks |
+| **OpenCode** | Provider flexibility | 75+ AI providers, open source |
+
+**Recommendation**: Start with Claude Code for the best out-of-box experience. Try Kiro CLI if you want structured spec-driven development, or OpenCode if you prefer open-source tooling.
+
+All tools use AWS Bedrock automatically via the EC2 IAM role - no API keys needed.
+
 ### Testing Bedrock Access
 
 After SSH'ing to your EC2 instance, verify Bedrock access:
@@ -155,6 +171,12 @@ aws bedrock list-foundation-models --by-provider anthropic --region us-east-1
 
 # Test Claude Code
 claude --help
+
+# Test Kiro CLI
+kiro-cli doctor
+
+# Test OpenCode
+opencode --version
 
 # Check AWS credentials (should show IAM role)
 aws sts get-caller-identity
