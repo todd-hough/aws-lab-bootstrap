@@ -123,13 +123,11 @@ This project includes full integration with AWS Bedrock for using Anthropic's Cl
 
 The following Claude models are configured and ready to use:
 
-| Model | Version | Model ID | Use Case |
-|-------|---------|----------|----------|
-| **Claude Opus 4.1** | 4.1 | `anthropic.claude-opus-4-1-20250805-v1:0` | Most intelligent model for complex reasoning and agentic tasks |
-| **Claude Sonnet 4.5** | 4.5 | `anthropic.claude-sonnet-4-5-20250929-v1:0` | Advanced model for agents and coding (default) |
-| **Claude Haiku 4.5** | 4.5 | `anthropic.claude-haiku-4-5-20251001-v1:0` | Efficient model with strong performance |
-
-**Note**: Claude Sonnet 4.5 and Haiku 4.5 support cross-region inference using the `global.anthropic` prefix for better availability.
+| Model | Version | Use Case |
+|-------|---------|----------|
+| **Claude Opus 4.5** | 4.5 | Most intelligent model for complex reasoning and agentic tasks |
+| **Claude Sonnet 4.5** | 4.5 | Advanced model for agents and coding |
+| **Claude Haiku 4.5** | 4.5 | Efficient model with strong performance |
 
 ### Claude Code Configuration
 
@@ -137,13 +135,10 @@ Claude Code CLI is pre-configured to use AWS Bedrock with the following settings
 
 - **Provider**: AWS Bedrock
 - **Region**: Your configured AWS region (from `aws_region` variable)
-- **Models**: Auto-discovered on each login from AWS Bedrock inference profiles
-  - Latest Claude Sonnet 4.5.x (default)
-  - Latest Claude Haiku 4.5.x (fast model)
-  - Latest Claude Opus 4.x
+- **Models**: Claude Code handles model discovery automatically
 - **Authentication**: EC2 IAM role (automatic, no keys needed)
 
-Configuration is managed via environment variables in `~/.bashrc` that query AWS Bedrock on each login to discover the latest available model versions.
+Configuration is managed via environment variables in `~/.bashrc`.
 
 ### Testing Bedrock Access
 

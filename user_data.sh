@@ -142,25 +142,19 @@ AWS Bedrock Configuration:
 - Region: ${aws_region}
 - Claude Code is configured to use AWS Bedrock
 - Environment: CLAUDE_CODE_USE_BEDROCK=1
-- Models: Auto-discovered on each login
-  * Latest Claude Opus 4.x [ANTHROPIC_DEFAULT_OPUS_MODEL]
-  * Latest Claude Sonnet 4.5.x [ANTHROPIC_MODEL - default]
-  * Latest Claude Haiku 4.5.x [ANTHROPIC_DEFAULT_HAIKU_MODEL - fast model]
+- Models: Claude Code handles model discovery automatically
 - Authentication: EC2 IAM role (automatic)
-- Note: Models are queried from Bedrock on each login via ~/.bashrc
 
 Getting Started:
 1. Your user is 'ec2-user'
 2. Docker is ready to use (no sudo required)
 3. Claude Code is ready to use (configured for AWS Bedrock)
 4. AWS credentials are automatically configured via IAM role
-5. Note: First login may take a few seconds while querying latest models
 
 Quick Test:
 - Test AWS CLI: aws bedrock list-foundation-models --region ${aws_region}
 - Test Claude Code: claude --help
 - Check Claude Code usage: ccusage
-- Check model configuration: echo $ANTHROPIC_MODEL
 
 Instance Details:
 - Project: ${project_name}
@@ -189,25 +183,6 @@ export PATH="$HOME/.local/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-# Claude Code - Model Configuration (auto-discovered from AWS Bedrock on each login)
-# Query AWS Bedrock for latest inference profiles
-export ANTHROPIC_DEFAULT_SONNET_MODEL=$(aws bedrock list-inference-profiles \
-  --region ${aws_region} \
-  --query 'inferenceProfileSummaries[?contains(inferenceProfileId, `claude-sonnet-4-5`)] | sort_by(@, &inferenceProfileId) | [-1].inferenceProfileId' \
-  --output text 2>/dev/null)
-
-export ANTHROPIC_MODEL="$ANTHROPIC_DEFAULT_SONNET_MODEL"
-
-export ANTHROPIC_DEFAULT_HAIKU_MODEL=$(aws bedrock list-inference-profiles \
-  --region ${aws_region} \
-  --query 'inferenceProfileSummaries[?contains(inferenceProfileId, `claude-haiku-4-5`)] | sort_by(@, &inferenceProfileId) | [-1].inferenceProfileId' \
-  --output text 2>/dev/null)
-
-export ANTHROPIC_DEFAULT_OPUS_MODEL=$(aws bedrock list-inference-profiles \
-  --region ${aws_region} \
-  --query 'inferenceProfileSummaries[?contains(inferenceProfileId, `claude-opus-4`)] | sort_by(@, &inferenceProfileId) | [-1].inferenceProfileId' \
-  --output text 2>/dev/null)
 
 # Claude Code - Token Limits (prevent Bedrock throttling)
 export CLAUDE_CODE_MAX_OUTPUT_TOKENS=4096
