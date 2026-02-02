@@ -24,6 +24,10 @@ dnf install -y \
     htop \
     tmux
 
+# Fix Amazon Linux 2023 git config (ships with autocrlf=true which breaks line endings)
+echo "Fixing git line ending configuration..."
+sed -i 's/autocrlf = true/autocrlf = input/' /etc/gitconfig
+
 # Install Docker
 echo "Installing Docker..."
 dnf install -y docker
