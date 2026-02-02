@@ -87,8 +87,8 @@ resource "aws_route_table_association" "public" {
 }
 
 # Security Group for EC2
-resource "aws_security_group" "dev_instance" {
-  name        = "${var.project_name}-dev-instance-sg"
+resource "aws_security_group" "server_sg" {
+  name        = "${var.project_name}-server-sg"
   description = "Security group for development EC2 instance"
   vpc_id      = aws_vpc.main.id
 
@@ -115,7 +115,7 @@ resource "aws_security_group" "dev_instance" {
 
   tags = merge(
     {
-      Name = "${var.project_name}-dev-instance-sg"
+      Name = "${var.project_name}-server-sg"
     },
     var.tags
   )
