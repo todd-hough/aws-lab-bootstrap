@@ -39,6 +39,16 @@ output "ssh_connection_command" {
   value       = "ssh ${var.project_name}-server"
 }
 
+output "ssh_config_entry" {
+  description = "SSH config entry to append to ~/.ssh/config"
+  value       = <<-EOT
+Host ${var.project_name}-server
+  HostName ${aws_eip.server_eip.public_ip}
+  User ec2-user
+  IdentityFile ~/.ssh/${var.project_name}-server.pem
+EOT
+}
+
 output "cloudwatch_log_group" {
   description = "CloudWatch log group name"
   value       = var.enable_cloudwatch_logs ? aws_cloudwatch_log_group.server_logs[0].name : "CloudWatch logging disabled"
@@ -53,13 +63,8 @@ output "setup_instructions" {
        terraform output -raw ssh_private_key > ~/.ssh/${var.project_name}-server.pem
        chmod 600 ~/.ssh/${var.project_name}-server.pem
 
-    2. Add SSH config entry (copy and paste this entire block):
-       cat >> ~/.ssh/config << 'EOF'
-Host ${var.project_name}-server
-  HostName ${aws_eip.server_eip.public_ip}
-  User ec2-user
-  IdentityFile ~/.ssh/${var.project_name}-server.pem
-EOF
+    2. Add SSH config entry:
+       terraform output -raw ssh_config_entry >> ~/.ssh/config
 
     3. Connect via SSH:
        ssh ${var.project_name}-server
