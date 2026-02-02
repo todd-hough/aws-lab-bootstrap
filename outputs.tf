@@ -35,8 +35,8 @@ output "ssh_private_key" {
 }
 
 output "ssh_connection_command" {
-  description = "SSH command to connect to the instance"
-  value       = "ssh -i dev-key.pem ec2-user@${aws_eip.server_eip.public_ip}"
+  description = "SSH command to connect to the instance (after running setup_instructions)"
+  value       = "ssh ${var.project_name}-server"
 }
 
 output "cloudwatch_log_group" {
@@ -48,20 +48,25 @@ output "setup_instructions" {
   description = "Instructions for setting up SSH access"
   value       = <<-EOT
     To connect to your instance:
-    1. Save the SSH private key:
-       terraform output -raw ssh_private_key > dev-key.pem
-       chmod 600 dev-key.pem
 
-    2. Connect via SSH:
-       ssh -i dev-key.pem ec2-user@${aws_eip.server_eip.public_ip}
+    1. Save the SSH private key to ~/.ssh/:
+       terraform output -raw ssh_private_key > ~/.ssh/${var.project_name}-server.pem
+       chmod 600 ~/.ssh/${var.project_name}-server.pem
 
-    3. For VS Code Remote SSH:
+    2. Add SSH config entry (copy and paste this entire block):
+       cat >> ~/.ssh/config << 'EOF'
+       Host ${var.project_name}-server
+         HostName ${aws_eip.server_eip.public_ip}
+         User ec2-user
+         IdentityFile ~/.ssh/${var.project_name}-server.pem
+       EOF
+
+    3. Connect via SSH:
+       ssh ${var.project_name}-server
+
+    For VS Code Remote SSH:
        - Install the "Remote - SSH" extension
-       - Add to ~/.ssh/config:
-         Host ${var.project_name}-server
-           HostName ${aws_eip.server_eip.public_ip}
-           User ec2-user
-           IdentityFile /path/to/dev-key.pem
        - Connect using Command Palette: "Remote-SSH: Connect to Host"
+       - Select "${var.project_name}-server" from the list
   EOT
 }

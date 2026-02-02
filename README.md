@@ -10,7 +10,7 @@ This project creates a complete AWS development environment including:
 - **Compute**: EC2 instance with configurable size
 - **Security**: Security groups with SSH access restricted to specified IP addresses
 - **IAM**: Instance profile with AdministratorAccess for AWS operations
-- **AI Integration**: AWS Bedrock with Claude models (Opus 4.1, Sonnet 4.5, Haiku 4.5)
+- **AI Integration**: AWS Bedrock with Claude models (Opus 4.5, Sonnet 4.5, Haiku 4.5)
 - **Monitoring**: CloudWatch Logs integration for system and application logs
 - **Storage**: EBS root volume with encryption
 
@@ -69,51 +69,32 @@ terraform apply
 
 Review the planned changes and type `yes` to confirm.
 
-### 5. Save the SSH Key
+### 5. Set Up SSH Access
 
-After deployment, save the private SSH key:
-
-```bash
-terraform output -raw ssh_private_key > dev-key.pem
-chmod 600 dev-key.pem
-```
-
-**IMPORTANT**: Keep this file secure! It's the only way to access your EC2 instance.
-
-### 6. Connect to Your Instance
+Run the following to see step-by-step instructions for saving your SSH key and configuring SSH:
 
 ```bash
-# Get the connection command
-terraform output ssh_connection_command
-
-# Connect via SSH
-ssh -i dev-key.pem ec2-user@<PUBLIC_IP>
+terraform output setup_instructions
 ```
+
+Follow the instructions to save the key to `~/.ssh/` and configure `~/.ssh/config`, then connect with:
+
+```bash
+ssh dev-server
+```
+
+**IMPORTANT**: Keep your SSH key secure! It's the only way to access your EC2 instance.
 
 ## VS Code Remote SSH Setup
 
-### Option 1: Manual Configuration
+After completing the SSH setup above, VS Code can use the same configuration:
 
 1. Install the "Remote - SSH" extension in VS Code
-2. Add to your `~/.ssh/config` file:
+2. Open Command Palette (Cmd/Ctrl+Shift+P)
+3. Select "Remote-SSH: Connect to Host"
+4. Choose "dev-server" from the list
 
-```ssh-config
-Host dev-env
-  HostName <PUBLIC_IP>
-  User ec2-user
-  IdentityFile /absolute/path/to/dev-key.pem
-```
-
-3. In VS Code, use Command Palette (Cmd/Ctrl+Shift+P):
-   - Select "Remote-SSH: Connect to Host"
-   - Choose "dev-env"
-
-### Option 2: Quick Connect
-
-1. In VS Code, open Command Palette
-2. Select "Remote-SSH: Connect to Host"
-3. Enter: `ec2-user@<PUBLIC_IP>`
-4. Select the identity file when prompted
+The SSH config entry created by the setup instructions works automatically with VS Code.
 
 ## AWS Bedrock Integration
 
