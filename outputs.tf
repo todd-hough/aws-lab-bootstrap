@@ -60,11 +60,11 @@ output "setup_instructions" {
     To connect to your instance:
 
     1. Save the SSH private key to ~/.ssh/:
-       terraform output -raw ssh_private_key > ~/.ssh/${var.project_name}-server.pem
+       terraform output -raw ssh_private_key | tr -d '\r' > ~/.ssh/${var.project_name}-server.pem
        chmod 600 ~/.ssh/${var.project_name}-server.pem
 
     2. Add SSH config entry:
-       terraform output -raw ssh_config_entry >> ~/.ssh/config
+       terraform output -raw ssh_config_entry | tr -d '\r' >> ~/.ssh/config
 
     3. Connect via SSH:
        ssh ${var.project_name}-server
