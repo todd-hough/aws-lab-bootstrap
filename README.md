@@ -148,17 +148,6 @@ claude
 # No API key configuration needed!
 ```
 
-### Model Invocation Logging
-
-If CloudWatch logging is enabled, all Bedrock model invocations are logged to:
-- **Log Group**: `/aws/bedrock/<project-name>-model-invocations`
-- **Retention**: 7 days
-
-View logs:
-```bash
-aws logs tail /aws/bedrock/dev-env-model-invocations --follow
-```
-
 ### Regional Availability
 
 Claude models are available in multiple AWS regions. Common regions:
@@ -176,7 +165,7 @@ For cross-region inference with Sonnet 4.5 and Haiku 4.5, use the global endpoin
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `aws_region` | AWS region for deployment | `us-east-1` |
-| `project_name` | Prefix for resource names | `dev-env` |
+| `project_name` | Prefix for resource names | `dev` |
 | `instance_type` | EC2 instance type | `t3.medium` |
 | `root_volume_size` | Root EBS volume size (GB) | `30` |
 | `allowed_ssh_cidrs` | IP addresses allowed for SSH | `[]` (must configure!) |
@@ -212,7 +201,7 @@ terraform output setup_instructions
 
 If CloudWatch logging is enabled (default), logs are sent to CloudWatch Logs:
 
-- **Log Group**: `/aws/ec2/<project_name>-dev-instance`
+- **Log Group**: `/aws/ec2/<project_name>-server`
 - **Streams**:
   - `user-data.log` - Instance initialization logs
   - `messages` - System messages
@@ -220,7 +209,7 @@ If CloudWatch logging is enabled (default), logs are sent to CloudWatch Logs:
 
 View logs in AWS Console or via CLI:
 ```bash
-aws logs tail /aws/ec2/dev-env-dev-instance --follow
+aws logs tail /aws/ec2/dev-server --follow
 ```
 
 ## Cost Considerations
