@@ -55,11 +55,11 @@ output "setup_instructions" {
 
     2. Add SSH config entry (copy and paste this entire block):
        cat >> ~/.ssh/config << 'EOF'
-       Host ${var.project_name}-server
-         HostName ${aws_eip.server_eip.public_ip}
-         User ec2-user
-         IdentityFile ~/.ssh/${var.project_name}-server.pem
-       EOF
+Host ${var.project_name}-server
+  HostName ${aws_eip.server_eip.public_ip}
+  User ec2-user
+  IdentityFile ~/.ssh/${var.project_name}-server.pem
+EOF
 
     3. Connect via SSH:
        ssh ${var.project_name}-server
