@@ -2,7 +2,7 @@
 aws_region = "us-east-1"
 
 # Project Configuration
-project_name = "dev-env"
+project_name = "dev"
 
 # EC2 Instance Configuration
 instance_type      = "t3.medium"  # Options: t3.small, t3.medium, t3.large, t3.xlarge, etc.

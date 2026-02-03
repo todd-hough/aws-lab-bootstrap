@@ -10,7 +10,7 @@ This project creates a complete AWS development environment including:
 - **Compute**: EC2 instance with configurable size
 - **Security**: Security groups with SSH access restricted to specified IP addresses
 - **IAM**: Instance profile with AdministratorAccess for AWS operations
-- **AI Integration**: AWS Bedrock with Claude models (Opus 4.1, Sonnet 4.5, Haiku 4.5)
+- **AI Integration**: AWS Bedrock with Claude models (Opus 4.5, Sonnet 4.5, Haiku 4.5)
 - **Monitoring**: CloudWatch Logs integration for system and application logs
 - **Storage**: EBS root volume with encryption
 
@@ -69,51 +69,32 @@ terraform apply
 
 Review the planned changes and type `yes` to confirm.
 
-### 5. Save the SSH Key
+### 5. Set Up SSH Access
 
-After deployment, save the private SSH key:
-
-```bash
-terraform output -raw ssh_private_key > dev-key.pem
-chmod 600 dev-key.pem
-```
-
-**IMPORTANT**: Keep this file secure! It's the only way to access your EC2 instance.
-
-### 6. Connect to Your Instance
+Run the following to see step-by-step instructions for saving your SSH key and configuring SSH:
 
 ```bash
-# Get the connection command
-terraform output ssh_connection_command
-
-# Connect via SSH
-ssh -i dev-key.pem ec2-user@<PUBLIC_IP>
+terraform output setup_instructions
 ```
+
+Follow the instructions to save the key to `~/.ssh/` and configure `~/.ssh/config`, then connect with:
+
+```bash
+ssh dev-server
+```
+
+**IMPORTANT**: Keep your SSH key secure! It's the only way to access your EC2 instance.
 
 ## VS Code Remote SSH Setup
 
-### Option 1: Manual Configuration
+After completing the SSH setup above, VS Code can use the same configuration:
 
 1. Install the "Remote - SSH" extension in VS Code
-2. Add to your `~/.ssh/config` file:
+2. Open Command Palette (Cmd/Ctrl+Shift+P)
+3. Select "Remote-SSH: Connect to Host"
+4. Choose "dev-server" from the list
 
-```ssh-config
-Host dev-env
-  HostName <PUBLIC_IP>
-  User ec2-user
-  IdentityFile /absolute/path/to/dev-key.pem
-```
-
-3. In VS Code, use Command Palette (Cmd/Ctrl+Shift+P):
-   - Select "Remote-SSH: Connect to Host"
-   - Choose "dev-env"
-
-### Option 2: Quick Connect
-
-1. In VS Code, open Command Palette
-2. Select "Remote-SSH: Connect to Host"
-3. Enter: `ec2-user@<PUBLIC_IP>`
-4. Select the identity file when prompted
+The SSH config entry created by the setup instructions works automatically with VS Code.
 
 ## AWS Bedrock Integration
 
@@ -123,13 +104,11 @@ This project includes full integration with AWS Bedrock for using Anthropic's Cl
 
 The following Claude models are configured and ready to use:
 
-| Model | Version | Model ID | Use Case |
-|-------|---------|----------|----------|
-| **Claude Opus 4.1** | 4.1 | `anthropic.claude-opus-4-1-20250805-v1:0` | Most intelligent model for complex reasoning and agentic tasks |
-| **Claude Sonnet 4.5** | 4.5 | `anthropic.claude-sonnet-4-5-20250929-v1:0` | Advanced model for agents and coding (default) |
-| **Claude Haiku 4.5** | 4.5 | `anthropic.claude-haiku-4-5-20251001-v1:0` | Efficient model with strong performance |
-
-**Note**: Claude Sonnet 4.5 and Haiku 4.5 support cross-region inference using the `global.anthropic` prefix for better availability.
+| Model | Version | Use Case |
+|-------|---------|----------|
+| **Claude Opus 4.5** | 4.5 | Most intelligent model for complex reasoning and agentic tasks |
+| **Claude Sonnet 4.5** | 4.5 | Advanced model for agents and coding |
+| **Claude Haiku 4.5** | 4.5 | Efficient model with strong performance |
 
 ### Claude Code Configuration
 
@@ -137,13 +116,10 @@ Claude Code CLI is pre-configured to use AWS Bedrock with the following settings
 
 - **Provider**: AWS Bedrock
 - **Region**: Your configured AWS region (from `aws_region` variable)
-- **Models**: Auto-discovered on each login from AWS Bedrock inference profiles
-  - Latest Claude Sonnet 4.5.x (default)
-  - Latest Claude Haiku 4.5.x (fast model)
-  - Latest Claude Opus 4.x
+- **Models**: Claude Code handles model discovery automatically
 - **Authentication**: EC2 IAM role (automatic, no keys needed)
 
-Configuration is managed via environment variables in `~/.bashrc` that query AWS Bedrock on each login to discover the latest available model versions.
+Configuration is managed via environment variables in `~/.bashrc`.
 
 ### Testing Bedrock Access
 
@@ -172,17 +148,6 @@ claude
 # No API key configuration needed!
 ```
 
-### Model Invocation Logging
-
-If CloudWatch logging is enabled, all Bedrock model invocations are logged to:
-- **Log Group**: `/aws/bedrock/<project-name>-model-invocations`
-- **Retention**: 7 days
-
-View logs:
-```bash
-aws logs tail /aws/bedrock/dev-env-model-invocations --follow
-```
-
 ### Regional Availability
 
 Claude models are available in multiple AWS regions. Common regions:
@@ -200,7 +165,7 @@ For cross-region inference with Sonnet 4.5 and Haiku 4.5, use the global endpoin
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `aws_region` | AWS region for deployment | `us-east-1` |
-| `project_name` | Prefix for resource names | `dev-env` |
+| `project_name` | Prefix for resource names | `dev` |
 | `instance_type` | EC2 instance type | `t3.medium` |
 | `root_volume_size` | Root EBS volume size (GB) | `30` |
 | `allowed_ssh_cidrs` | IP addresses allowed for SSH | `[]` (must configure!) |
@@ -236,7 +201,7 @@ terraform output setup_instructions
 
 If CloudWatch logging is enabled (default), logs are sent to CloudWatch Logs:
 
-- **Log Group**: `/aws/ec2/<project_name>-dev-instance`
+- **Log Group**: `/aws/ec2/<project_name>-server`
 - **Streams**:
   - `user-data.log` - Instance initialization logs
   - `messages` - System messages
@@ -244,7 +209,7 @@ If CloudWatch logging is enabled (default), logs are sent to CloudWatch Logs:
 
 View logs in AWS Console or via CLI:
 ```bash
-aws logs tail /aws/ec2/dev-env-dev-instance --follow
+aws logs tail /aws/ec2/dev-server --follow
 ```
 
 ## Cost Considerations

@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "Project name used for resource naming"
   type        = string
-  default     = "dev-env"
+  default     = "dev"
 }
 
 variable "instance_type" {
