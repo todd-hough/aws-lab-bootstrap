@@ -55,10 +55,17 @@ aws --version
 
 # Install Node.js via nvm for ec2-user
 echo "Installing Node.js via nvm..."
-sudo -u ec2-user bash << 'EOF'
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+NVM_VERSION=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r .tag_name)
+# Fallback to known stable version if API call fails
+if [ -z "$NVM_VERSION" ] || [ "$NVM_VERSION" == "null" ]; then
+  echo "Failed to fetch latest NVM version, using fallback v0.39.7"
+  NVM_VERSION="v0.39.7"
+fi
+echo "Using NVM version: $NVM_VERSION"
+sudo -u ec2-user bash << EOF
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh | bash
+export NVM_DIR="\$HOME/.nvm"
+[ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
 nvm install --lts
 nvm use --lts
 nvm alias default lts/*
